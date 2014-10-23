@@ -147,7 +147,8 @@ namespace Kassadin
             }
 
         }
-                private static void UseSpells(bool useQ, bool useW, bool useE, bool useR)
+        
+        private static void UseSpells(bool useQ, bool useW, bool useE, bool useR)
         {
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
@@ -172,7 +173,8 @@ namespace Kassadin
             }
 
         }
-                public static bool packets()
+        
+        public static bool packets()
         {
             return menu.Item("packet").GetValue<bool>();
         }
