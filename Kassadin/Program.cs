@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
@@ -46,7 +46,7 @@ namespace Kassadin
             R = new Spell(SpellSlot.R, 700);
 
             E.SetSkillshot(0.5f, float.MaxValue, float.MaxValue, false, SkillshotType.SkillshotCone);
-            R.SetSkillshot(0.5f, float.MaxValue, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            R.SetSkillshot(0.5f, 200f, 1200f, false, SkillshotType.SkillshotCircle);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -71,6 +71,14 @@ namespace Kassadin
             DM.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E")).SetValue(true);
             DM.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R")).SetValue(true);
             DM.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+            DM.SubMenu("Misc").AddItem(new MenuItem("packet", "Use Packets").SetValue(true));
+
+            DM.AddSubMenu(new Menu("Harass", "Harass"));
+            DM.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q")).SetValue(true);
+            DM.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W")).SetValue(true);
+            DM.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E")).SetValue(true);
+            DM.SubMenu("Harass").AddItem(new MenuItem("UseRHarass", "Use R")).SetValue(true);
+            DM.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind(menu.Item("Farm").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
             
             DM.AddSubMenu(new Menu("Drawings", "Drawings"));
@@ -139,6 +147,40 @@ namespace Kassadin
             }
 
         }
+                private static void UseSpells(bool useQ, bool useW, bool useE, bool useR)
+        {
+            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
+            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
+
+            if (useQ && qTarget != null && Q.IsReady() && Player.Distance(qTarget) <= Q.Range)
+            {
+                Q.Cast(qTarget, packets());
+                return;
+            }
+
+            if (useE && eTarget != null && E.IsReady() && Player.Distance(eTarget) <= E.Range)
+            {
+                E.Cast();
+            }
+
+            if (useR && rTarget != null && R.IsReady() && R.GetPrediction(rTarget).Hitchance >= HitChance.High && GetComboDamage(rTarget) > qTarget.Health + 150 && Player.Distance(rTarget) <= R.Range)
+            {
+                R.Cast(rTarget, packets());
+                return;
+            }
+
+        }
+                public static bool packets()
+        {
+            return menu.Item("packet").GetValue<bool>();
+        }
+
+        private static void Harass()
+        {
+            Orbwalker.SetAttack(!(menu.Item("MoveToMouse").GetValue<KeyBind>().Active));
+            UseSpells(menu.Item("UseQHarass").GetValue<bool>(), menu.Item("UseWHarass").GetValue<bool>(),
+                menu.Item("UseEHarass").GetValue<bool>(), false);
     }
 }
-
